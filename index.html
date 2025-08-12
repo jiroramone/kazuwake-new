@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>かずわけゲーム</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #3f3f46; /* Stone-like dark gray */
+            color: #e2e8f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        #game-container {
+            perspective: 1000px;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        
+        /* 背景全体を覆う両開きの扉 */
+        .background-door-wrapper {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100; /* ゲーム要素より手前に表示 */
+            transform: translateZ(-1000px) scale(0.1);
+            transition: transform 1.5s ease-in-out;
+            opacity: 0; /* 最初は透明 */
+        }
+        
+        .door-emerge .background-door-wrapper {
+            opacity: 1; /* 出現時に不透明に */
+            transform: translateZ(0) scale(1);
+        }
+
+        .background-door {
+            width: 50%;
+            height: 100%;
+            background-color: #7a5f4c; /* 木目調の色 */
+            background-image: linear-gradient(135deg, rgba(0,0,0,0.1) 25%, transparent 25%),
+                              linear-gradient(-135deg, rgba(0,0,0,0.1) 25%, transparent 25%),
+                              linear-gradient(45deg, rgba(0,0,0,0.1) 25%, transparent 25%),
+                              linear-gradient(-45deg, rgba(0,0,0,0.1) 25%, transparent 25%);
+            background-size: 80px 80px;
+            border: 8px solid #5a4638;
+            transition: transform 1.5s ease-in-out;
+            position: relative;
+            box-sizing: border-box;
+        }
+        
+        .background-door-left {
+            transform-origin: left;
+            border-right: none;
+        }
+        
+        .background-door-right {
+            transform-origin: right;
+            border-left: none;
+        }
+        
+        .door-open .background-door-left {
+            transform: rotateY(-90deg);
+        }
+        
+        .door-open .background-door-right {
+            transform: rotateY(90deg);
+        }
+
+        #title-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: rgba(43, 43, 51, 0.9);
+            padding: 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            transition: transform 1s ease-in-out;
+            transform: scale(1);
+            z-index: 10;
+        }
+
+        #game-screen {
+            display: none; /* Initially hidden */
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+        }
+
+        .game-elements-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            z-index: 50; /* ゲーム要素のZ-index */
+        }
+        
+        .game-elements-container.visible {
+            opacity: 1; /* アニメーション後に不透明に */
+        }
+
+        .game-elements {
+            opacity: 1;
+            transition: opacity 0.5s ease-in-out;
+        }
+        
+        .game-elements.hidden-elements {
+            opacity: 0;
+        }
+
+        .door-wrapper {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 500px;
+            height: 600px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+        
+        .door-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            text-align: center;
+        }
+        
+        .door-problem-container {
+            position: absolute;
+            top: 25%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            text-align: center;
+        }
+
+        #problem-question {
+            font-size: 2rem; /* Make the question text larger */
+            font-weight: bold;
+            color: #e2e8f0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        #problem-text {
+            font-size: 5rem; /* Make the number text even larger */
+            font-weight: bold;
+            color: #fed7aa;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        #lamps-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            position: absolute;
+            top: 20%; /* Move lamps down */
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        #question-and-number-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lamp {
+            width: 25px;
+            height: 25px;
+            background-color: #a0aec0;
+            border-radius: 50%;
+            border: 2px solid #2d3748;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s ease;
+        }
+
+        .lamp.lit {
+            background-color: #f6ad55;
+            box-shadow: 0 0 10px #f6ad55, inset 0 0 5px #f6ad55;
+        }
+
+        #marbles-area {
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(45, 55, 72, 0.8);
+            min-height: 50px;
+            z-index: 20;
+        }
+
+        .marble {
+            width: 30px;
+            height: 30px;
+            background-color: #e53e3e; /* Changed to red */
+            border-radius: 50%;
+            cursor: grab;
+            touch-action: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        #split-area {
+            position: absolute;
+            bottom: 50px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10%;
+            z-index: 30;
+            align-items: center; /* Center items vertically */
+        }
+
+        .plate-box {
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, #2d3748 0%, #4a5568 100%);
+            border: 4px solid #718096;
+            border-radius: 50%;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            padding: 10px;
+        }
+
+        .plate-box.highlight {
+            border-color: rgba(99, 179, 237, 0.5); /* Transparent highlight color */
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5), 0 0 15px rgba(99, 179, 237, 0.5);
+        }
+
+        #timer {
+            font-size: 1.5rem;
+            color: #f56565;
+            font-weight: bold;
+            position: absolute;
+            top: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 25;
+        }
+
+        .btn {
+            background-color: #63b3ed;
+            color: #fff;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease-in-out;
+            border: none;
+        }
+
+        .btn:hover {
+            background-color: #4299e1;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        #submit-btn {
+            z-index: 25;
+        }
+
+        #message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(45, 55, 72, 0.95);
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            z-index: 100;
+            display: none;
+        }
+        
+        #clear-menu {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 2rem;
+            background-color: rgba(43, 43, 51, 0.95);
+            border-radius: 1rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            z-index: 50;
+            text-align: center;
+            display: none;
+        }
+        
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100">
+    <div id="game-container">
+        <!-- 背景全体を覆う両開きの扉 -->
+        <div class="background-door-wrapper" id="background-door-wrapper">
+            <div class="background-door background-door-left"></div>
+            <div class="background-door background-door-right"></div>
+        </div>
+        
+        <!-- タイトル画面 -->
+        <div id="title-screen">
+            <h1 class="text-4xl font-bold mb-6">かずわけゲーム</h1>
+            <p class="mb-4">レベルを選んでね！</p>
+            <div class="button-group">
+                <button class="btn" onclick="startGame(1)">レベル1: 順番に出題</button>
+                <button class="btn" onclick="startGame(2)">レベル2: ランダム出題</button>
+                <button class="btn" onclick="startGame(3)">レベル3: 時間制限付き</button>
+            </div>
+        </div>
+
+        <!-- ゲーム画面 -->
+        <div id="game-screen" class="hidden">
+            <!-- ゲーム要素を中央に配置するコンテナ -->
+            <div class="game-elements-container" id="game-elements-container">
+                <div class="door-wrapper" id="door-wrapper">
+                    <div class="door-content game-elements" id="game-elements">
+                        <div class="door-problem-container">
+                            <div id="question-and-number-container">
+                                 <p id="problem-question">いくつといくつにわけられる？</p>
+                                 <div id="lamps-container"></div>
+                                 <p id="problem-text" class="my-4">3</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    
+                <!-- 皿のような分けるスペース -->
+                <div id="split-area" class="game-elements">
+                    <div id="split-left" class="plate-box" ondrop="handleDrop(event)" ondragover="allowDrop(event)" ondragleave="handleDragLeave(event)"></div>
+                    <button id="submit-btn" class="btn game-elements" onclick="handleSubmit()">できた！</button>
+                    <div id="split-right" class="plate-box" ondrop="handleDrop(event)" ondragover="allowDrop(event)" ondragleave="handleDragLeave(event)"></div>
+                </div>
+    
+                <!-- マーブルを置く場所 -->
+                <div id="marbles-area" class="w-1/2 game-elements" ondrop="handleDrop(event)" ondragover="allowDrop(event)" ondragleave="handleDragLeave(event)"></div>
+            </div>
+            
+            <div id="timer" class="hidden"></div>
+        </div>
+
+        <!-- メッセージボックス -->
+        <div id="message-box" class="hidden">
+            <p id="message-text" class="text-xl font-bold"></p>
+            <button id="message-close-btn" class="btn mt-4 w-full">OK</button>
+        </div>
+
+        <!-- レベルクリア時の選択肢 -->
+        <div id="clear-menu" class="hidden">
+            <h2 class="text-2xl font-bold mb-4">扉クリア！</h2>
+            <div class="button-group">
+                <button id="next-problem-btn" class="btn">次の問題へ</button>
+                <button id="return-to-title-btn" class="btn">タイトルに戻る</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ゲームの状態を管理する変数
+        let currentLevel = 0;
+        let currentNumber = 0;
+        let allCombinations = [];
+        let foundCombinations = new Set();
+        let currentTimer = null;
+        const numbers = [3, 4, 5, 6, 7, 8, 9, 10];
+        let problemQueue = [];
+
+        // UI要素への参照
+        const titleScreen = document.getElementById('title-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const gameElementsContainer = document.getElementById('game-elements-container');
+        const backgroundDoorWrapper = document.getElementById('background-door-wrapper');
+        const gameElements = document.getElementById('game-elements');
+        const splitArea = document.getElementById('split-area');
+        const marblesArea = document.getElementById('marbles-area');
+        const submitBtn = document.getElementById('submit-btn');
+
+        const problemQuestion = document.getElementById('problem-question');
+        const problemText = document.getElementById('problem-text');
+        const lampsContainer = document.getElementById('lamps-container');
+        const splitLeft = document.getElementById('split-left');
+        const splitRight = document.getElementById('split-right');
+        const timerDisplay = document.getElementById('timer');
+        const messageBox = document.getElementById('message-box');
+        const messageText = document.getElementById('message-text');
+        const messageCloseBtn = document.getElementById('message-close-btn');
+        const clearMenu = document.getElementById('clear-menu');
+        const nextProblemBtn = document.getElementById('next-problem-btn');
+        const returnToTitleBtn = document.getElementById('return-to-title-btn');
+
+        // メッセージボックスを閉じる処理
+        messageCloseBtn.addEventListener('click', () => {
+            messageBox.classList.add('hidden');
+        });
+
+        // クリアメニューボタンの処理
+        nextProblemBtn.addEventListener('click', () => {
+            clearMenu.classList.add('hidden');
+            loadNextProblem();
+        });
+
+        returnToTitleBtn.addEventListener('click', () => {
+            clearMenu.classList.add('hidden');
+            returnToTitleScreen();
+        });
+
+        // ドラッグアンドドロップ関連のイベントハンドラ
+        let draggedMarble = null;
+
+        document.addEventListener('touchstart', (e) => {
+            const marble = e.target.closest('.marble');
+            if (marble) {
+                draggedMarble = marble;
+                marble.classList.add('opacity-50');
+                marble.style.position = 'absolute';
+            }
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            if (!draggedMarble) return;
+            e.preventDefault();
+            const touch = e.touches[0];
+            draggedMarble.style.left = `${touch.clientX - draggedMarble.offsetWidth / 2}px`;
+            draggedMarble.style.top = `${touch.clientY - draggedMarble.offsetHeight / 2}px`;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            if (!draggedMarble) return;
+
+            const touch = e.changedTouches[0];
+            const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
+            const parentSplitBox = targetElement.closest('.plate-box');
+            const marblesAreaElement = targetElement.closest('#marbles-area');
+
+            if (parentSplitBox) {
+                parentSplitBox.appendChild(draggedMarble);
+            } else if (marblesAreaElement) {
+                marblesArea.appendChild(draggedMarble);
+            }
+
+            draggedMarble.style = '';
+            draggedMarble.classList.remove('opacity-50');
+            draggedMarble = null;
+        });
+
+        function handleDragStart(e) {
+            draggedMarble = e.target;
+            setTimeout(() => e.target.classList.add('opacity-50'), 0);
+        }
+
+        function allowDrop(e) {
+            e.preventDefault();
+            const target = e.target.closest('.plate-box') || e.target.closest('#marbles-area');
+            if (target) {
+                target.classList.add('highlight');
+            }
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const target = e.target.closest('.plate-box') || e.target.closest('#marbles-area');
+            if (target) {
+                target.appendChild(draggedMarble);
+            } else {
+                 // Drop outside, return to marbles area
+                 marblesArea.appendChild(draggedMarble);
+            }
+            draggedMarble.classList.remove('opacity-50');
+            draggedMarble = null;
+            document.querySelectorAll('.plate-box, #marbles-area').forEach(box => box.classList.remove('highlight'));
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            const target = e.target.closest('.plate-box') || e.target.closest('#marbles-area');
+            if (target) {
+                target.classList.remove('highlight');
+            }
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('opacity-50');
+            document.querySelectorAll('.plate-box, #marbles-area').forEach(box => box.classList.remove('highlight'));
+            draggedMarble = null;
+        }
+
+        // 全てのマーブルにドラッグイベントを追加
+        function setupMarbles() {
+            const marbles = document.querySelectorAll('.marble');
+            marbles.forEach(marble => {
+                marble.addEventListener('dragstart', handleDragStart);
+                marble.addEventListener('dragend', handleDragEnd);
+            });
+        }
+        
+        // レベル選択とゲーム開始
+        function startGame(level) {
+            currentLevel = level;
+            titleScreen.style.display = 'none';
+            gameScreen.style.display = 'block';
+            
+            if (currentLevel === 1) {
+                problemQueue = [...numbers]; // 3-10まで順番
+            } else if (currentLevel === 2) {
+                problemQueue = shuffle([...numbers]); // ランダム
+            } else if (currentLevel === 3) {
+                problemQueue = shuffle([...numbers]); // ランダム＋タイマー
+                timerDisplay.classList.remove('hidden');
+            }
+
+            // 最初の問題の扉アニメーションを開始
+            startProblemAnimation();
+        }
+
+        // 問題開始時のアニメーション
+        function startProblemAnimation() {
+            // 扉を出現させ、奥から手前に迫ってくるアニメーション
+            backgroundDoorWrapper.classList.add('door-emerge');
+            
+            setTimeout(() => {
+                // 扉が迫り終えた後、ゲーム要素をフェードイン
+                const nextNumber = problemQueue.shift();
+                loadProblem(nextNumber);
+                gameElementsContainer.classList.add('visible');
+            }, 1500); // 扉が手前に迫るアニメーションの時間
+        }
+
+        // 問題をシャッフルする関数
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // 次の問題を読み込む
+        function loadNextProblem() {
+            if (problemQueue.length === 0) {
+                showModal('ゲームクリア！', 'このレベルの扉をすべて開けました！');
+                setTimeout(() => {
+                    returnToTitleScreen();
+                }, 3000);
+                return;
+            }
+
+            // ゲーム要素を非表示にする
+            gameElementsContainer.classList.remove('visible');
+
+            setTimeout(() => {
+                // ゲーム要素が消えた後、扉が開くアニメーションを開始
+                backgroundDoorWrapper.classList.add('door-open');
+                
+                setTimeout(() => {
+                    // 扉が開き終わった後、アニメーションクラスをリセットして次の扉アニメーションを開始
+                    backgroundDoorWrapper.classList.remove('door-open');
+                    backgroundDoorWrapper.classList.remove('door-emerge');
+                    
+                    // 次のアニメーションが始まるまでの短い間隔
+                    setTimeout(() => {
+                        startProblemAnimation();
+                    }, 100);
+                }, 1500); // 扉が開くアニメーションの時間
+            }, 500); // ゲーム要素がフェードアウトする時間
+        }
+
+        // 問題を読み込む
+        function loadProblem(number) {
+            currentNumber = number;
+            foundCombinations.clear();
+            allCombinations = [];
+
+            for (let i = 0; i <= number; i++) {
+                allCombinations.push([i, number - i].sort().join(','));
+            }
+            allCombinations = [...new Set(allCombinations)];
+
+            problemText.textContent = currentNumber;
+            renderMarbles();
+            renderLamps();
+            resetSplitBoxes();
+
+            if (currentLevel === 3) {
+                startTimer();
+            }
+        }
+
+        // マーブルをレンダリングする
+        function renderMarbles() {
+            marblesArea.innerHTML = '';
+            for (let i = 0; i < currentNumber; i++) {
+                const marble = document.createElement('div');
+                marble.classList.add('marble');
+                marble.draggable = true;
+                marblesArea.appendChild(marble);
+            }
+            setupMarbles();
+        }
+
+        // ランプをレンダリングする
+        function renderLamps() {
+            lampsContainer.innerHTML = '';
+            allCombinations.forEach(() => {
+                const lamp = document.createElement('div');
+                lamp.classList.add('lamp');
+                lampsContainer.appendChild(lamp);
+            });
+        }
+
+        // スプリットボックスをリセットする
+        function resetSplitBoxes() {
+            splitLeft.innerHTML = '';
+            splitRight.innerHTML = '';
+            marblesArea.innerHTML = '';
+            renderMarbles();
+        }
+
+        // 決定ボタンの処理
+        function handleSubmit() {
+            const leftCount = splitLeft.children.length;
+            const rightCount = splitRight.children.length;
+
+            const currentCombination = [leftCount, rightCount].sort().join(',');
+
+            if (foundCombinations.has(currentCombination)) {
+                showModal('ヒント', 'この組み合わせはもう見つけているよ。');
+                resetSplitBoxes();
+                return;
+            }
+
+            if (allCombinations.includes(currentCombination)) {
+                foundCombinations.add(currentCombination);
+                updateLamps();
+                showModal('正解！', 'よくできたね！');
+
+                if (currentLevel === 3) {
+                    resetTimer();
+                    if (foundCombinations.size === allCombinations.length) {
+                        // All combinations found for Level 3 as well
+                    } else {
+                        startTimer();
+                    }
+                }
+                
+                if (foundCombinations.size === allCombinations.length) {
+                    if (currentLevel === 3) {
+                        resetTimer();
+                    }
+                    if (problemQueue.length > 0) {
+                        clearMenu.classList.remove('hidden');
+                    } else {
+                        showModal('レベルクリア！', `レベル ${currentNumber} の扉をすべて開けました！`);
+                        setTimeout(() => {
+                            returnToTitleScreen();
+                        }, 3000);
+                    }
+                } else {
+                    resetSplitBoxes();
+                }
+            } else {
+                showModal('残念！', 'この組み合わせは違うみたい。');
+                resetSplitBoxes();
+            }
+        }
+
+        // ランプの状態を更新する
+        function updateLamps() {
+            const lamps = document.querySelectorAll('.lamp');
+            let lampIndex = 0;
+            allCombinations.forEach(comb => {
+                if (foundCombinations.has(comb)) {
+                    lamps[lampIndex].classList.add('lit');
+                }
+                lampIndex++;
+            });
+        }
+
+        // モーダル（メッセージボックス）を表示する
+        function showModal(title, text) {
+            messageText.textContent = text;
+            messageBox.classList.remove('hidden');
+        }
+
+        // レベル3のタイマー処理
+        function startTimer() {
+            resetTimer();
+            let timeLeft = 20;
+            timerDisplay.textContent = `残り時間: ${timeLeft}秒`;
+            submitBtn.disabled = false;
+
+            currentTimer = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = `残り時間: ${timeLeft}秒`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(currentTimer);
+                    submitBtn.disabled = true;
+                    showModal('時間切れ', '時間内に答えられませんでした。次の問題に進みます。');
+                    setTimeout(() => {
+                        loadNextProblem();
+                    }, 2000);
+                }
+            }, 1000);
+        }
+
+        // タイマーをリセットする
+        function resetTimer() {
+            if (currentTimer) {
+                clearInterval(currentTimer);
+            }
+            timerDisplay.textContent = '';
+        }
+
+        // タイトル画面に戻る
+        function returnToTitleScreen() {
+            gameScreen.style.display = 'none';
+            titleScreen.style.display = 'flex';
+            backgroundDoorWrapper.classList.remove('door-open');
+            backgroundDoorWrapper.classList.remove('door-emerge');
+            gameElementsContainer.classList.remove('visible');
+            resetTimer();
+            problemQueue = [];
+        }
+
+    </script>
+</body>
+</html>
