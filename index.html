@@ -61,8 +61,8 @@
 
         .game-elements-container {
             position: relative;
-            width: 90%;
-            max-width: 800px;
+            width: 100%; /* 幅を100%に設定 */
+            max-width: 800px; /* 最大幅を800pxに制限 */
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -74,13 +74,13 @@
         /* 問題文の背景を黒板風に */
         #problem-container {
             background-color: #2c523f; /* Dark green for chalkboard effect */
-            border: 10px solid #5a4638; /* Wood frame */
-            border-radius: 10px;
-            padding: 1rem;
+            border: 12px solid #5a4638; /* Wood frame */
+            border-radius: 12px;
+            padding: 1.5rem;
             text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            width: 60%;
-            max-width: 500px;
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
+            width: 100%; /* 幅を100%に設定 */
+            max-width: 600px; /* 最大幅を600pxに制限 */
             position: relative;
             display: flex;
             flex-direction: column;
@@ -89,15 +89,15 @@
         }
         
         #problem-question {
-            font-size: 1.5rem;
+            font-size: 1.8rem; /* フォントサイズを大きく */
             font-weight: bold;
             color: #e2e8f0;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-            margin-bottom: 0;
+            margin-bottom: 0.5rem;
         }
 
         #problem-text {
-            font-size: 3rem;
+            font-size: 4rem; /* フォントサイズを大きく */
             font-weight: bold;
             color: #fed7aa; /* Chalk-like color */
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
@@ -117,12 +117,12 @@
             display: flex;
             justify-content: center;
             gap: 15px;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         .lamp {
-            width: 25px;
-            height: 25px;
+            width: 30px; /* ランプサイズを大きく */
+            height: 30px;
             background-color: #a0aec0;
             border-radius: 50%;
             border: 2px solid #2d3748;
@@ -139,19 +139,19 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 10px;
-            padding: 10px;
-            border-radius: 8px;
+            gap: 15px; /* マーブルの隙間を広く */
+            padding: 15px;
+            border-radius: 10px;
             background: rgba(45, 55, 72, 0.8);
-            min-height: 50px;
+            min-height: 80px; /* 最小高さを高く */
             width: 100%;
-            margin-bottom: 20px;
-            margin-top: 10px;
+            margin-bottom: 25px;
+            margin-top: 15px;
         }
 
         .marble {
-            width: 30px;
-            height: 30px;
+            width: 40px; /* マーブルサイズを大きく */
+            height: 40px;
             background-color: #e53e3e;
             border-radius: 50%;
             cursor: grab;
@@ -162,7 +162,7 @@
         #split-area {
             display: flex;
             justify-content: center;
-            gap: 30px;
+            gap: 40px; /* お皿の間の隙間を広く */
             align-items: center;
             flex-direction: column;
             width: 100%;
@@ -171,23 +171,23 @@
         .split-boxes {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 30px;
             width: 100%;
         }
 
         .plate-box {
-            width: 150px;
-            height: 150px;
+            width: 180px; /* 皿サイズを大きく */
+            height: 180px;
             background: radial-gradient(circle, #2d3748 0%, #4a5568 100%);
-            border: 4px solid #718096;
+            border: 5px solid #718096;
             border-radius: 50%;
             box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             align-items: center;
-            gap: 5px;
-            padding: 10px;
+            gap: 8px; /* 皿の中のマーブルの隙間を広く */
+            padding: 15px;
         }
 
         .plate-box.highlight {
@@ -196,18 +196,18 @@
         }
 
         #timer {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             color: #f56565;
             font-weight: bold;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         .btn {
             background-color: #63b3ed;
             color: #fff;
             font-weight: bold;
-            padding: 10px 20px;
-            border-radius: 8px;
+            padding: 12px 24px;
+            border-radius: 10px;
             cursor: pointer;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: all 0.2s ease-in-out;
@@ -239,8 +239,8 @@
         }
 
         #submit-btn {
-            padding: 0.5rem 1rem;
-            font-size: 1rem;
+            padding: 0.75rem 1.5rem;
+            font-size: 1.2rem;
             margin: 0;
         }
 
@@ -261,34 +261,39 @@
         /* スマートフォン向けスタイル */
         @media (max-width: 600px) {
             #problem-container {
-                width: 80%; /* スマートフォンでは黒板を少し大きく */
+                width: 100%; /* スマートフォンでは幅いっぱいに広げる */
                 border-width: 5px;
+                padding: 1rem;
             }
             #problem-question {
-                font-size: 1.2rem;
+                font-size: 1.2rem; /* フォントサイズを調整 */
             }
             #problem-text {
-                font-size: 2.5rem;
+                font-size: 2.5rem; /* フォントサイズを調整 */
             }
             #marbles-area {
-                padding: 5px;
-                gap: 5px;
+                padding: 10px;
+                gap: 8px;
             }
             .marble {
-                width: 25px;
-                height: 25px;
+                width: 30px; /* マーブルサイズを調整 */
+                height: 30px;
             }
             #split-area {
-                gap: 10px; /* 皿の間の隙間を狭く */
+                gap: 20px;
             }
             .plate-box {
-                width: 120px;
-                height: 120px;
-                border-width: 2px;
-                padding: 5px;
+                width: 140px; /* 皿サイズを調整 */
+                height: 140px;
+                border-width: 3px;
+                padding: 10px;
             }
             #timer {
-                font-size: 1.2rem;
+                font-size: 1.5rem;
+            }
+            .btn {
+                padding: 10px 20px;
+                font-size: 1rem;
             }
         }
     </style>
@@ -298,8 +303,8 @@
         
         <!-- タイトル画面 -->
         <div id="title-screen">
-            <h1 class="text-4xl font-bold mb-6">かずわけゲーム</h1>
-            <p class="mb-4">レベルを選んでね！</p>
+            <h1 class="text-5xl font-bold mb-8">かずわけゲーム</h1>
+            <p class="mb-6 text-xl">レベルを選んでね！</p>
             <div class="button-group">
                 <button class="btn" onclick="startGame(1)">レベル1: 順番に出題</button>
                 <button class="btn" onclick="startGame(2)">レベル2: ランダム出題</button>
