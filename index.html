@@ -274,14 +274,12 @@
                     <div id="lamps-container"></div>
                     <p id="problem-question">いくつといくつにわけられる？</p>
                     <p id="problem-text" class="my-4">3</p>
+                    <div id="marbles-area" ondrop="handleDrop(event)" ondragover="allowDrop(event)" ondragleave="handleDragLeave(event)"></div>
                     <button id="submit-btn" class="btn" onclick="handleSubmit()">できた！</button>
                 </div>
     
                 <div id="timer" class="hidden"></div>
 
-                <!-- マーブルを置く場所 -->
-                <div id="marbles-area" ondrop="handleDrop(event)" ondragover="allowDrop(event)" ondragleave="handleDragLeave(event)"></div>
-            
                 <!-- 皿のような分けるスペース -->
                 <div id="split-area">
                     <div class="split-boxes">
