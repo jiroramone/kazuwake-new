@@ -313,11 +313,7 @@
                 <div id="problem-container">
                     <div id="lamps-container"></div>
                     <p id="problem-question">いくつといくつにわけられる？</p>
-                    <!-- 数字とボタンを囲む新しいコンテナ -->
-                    <div id="problem-text-and-button-container">
-                        <p id="problem-text">3</p>
-                        <button id="submit-btn" class="btn" onclick="handleSubmit()">できた！</button>
-                    </div>
+                    <p id="problem-text">3</p>
                     <div id="marbles-area" ondrop="handleDrop(event)" ondragover="allowDrop(event)" ondragleave="handleDragLeave(event)"></div>
                 </div>
     
@@ -330,6 +326,8 @@
                         <div id="split-right" class="plate-box" ondrop="handleDrop(event)" ondragover="allowDrop(event)" ondragleave="handleDragLeave(event)"></div>
                     </div>
                 </div>
+                <!-- できた！ボタンを皿の下に移動 -->
+                <button id="submit-btn" class="btn mt-4" onclick="handleSubmit()">できた！</button>
             </div>
         </div>
 
@@ -390,16 +388,17 @@
 
         // ドラッグアンドドロップ関連のイベントハンドラ
         let draggedMarble = null;
+        let originalMarble = null;
 
         document.addEventListener('touchstart', (e) => {
             const marble = e.target.closest('.marble');
             if (marble) {
-                // タッチ開始時に元のマーブルを非表示にする
+                originalMarble = marble;
                 draggedMarble = marble.cloneNode(true);
                 draggedMarble.style.position = 'absolute';
                 draggedMarble.classList.add('opacity-50'); // ドラッグ中の見た目を変更
                 document.body.appendChild(draggedMarble);
-                marble.style.visibility = 'hidden'; // 元のマーブルを非表示に
+                originalMarble.style.visibility = 'hidden'; // 元のマーブルを非表示に
                 
                 const touch = e.touches[0];
                 draggedMarble.style.left = `${touch.clientX - marble.offsetWidth / 2}px`;
@@ -424,22 +423,22 @@
             const marblesAreaElement = targetElement.closest('#marbles-area');
 
             // 元のマーブルを再表示する
-            const originalMarble = document.querySelector(`.marble[style*="visibility: hidden"]`);
             if (originalMarble) {
                 originalMarble.style.visibility = 'visible';
             }
             
             if (parentSplitBox) {
-                // 新しいマーブルをドロップ先に移動
+                // ドロップ先に元のマーブルを移動
                 parentSplitBox.appendChild(originalMarble);
             } else if (marblesAreaElement) {
-                // 新しいマーブルを元のエリアに移動
+                // 元のエリアに元のマーブルを移動
                 marblesArea.appendChild(originalMarble);
             }
 
             // ドラッグ用のマーブルを削除
             draggedMarble.remove();
             draggedMarble = null;
+            originalMarble = null;
         });
 
         function handleDragStart(e) {
