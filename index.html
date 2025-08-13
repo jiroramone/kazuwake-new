@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>かずわけゲーム</title>
-    <!-- Tailwind CSS CDN -->
+    <!-- Tone.jsとTailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
 
@@ -303,6 +304,7 @@
         const numbers = [3, 4, 5, 6, 7, 8, 9, 10];
         let problemQueue = [];
         let isAnimating = false; // アニメーション中かどうかを管理するフラグ
+        let synth; // 効果音用のシンセサイザー
 
         // UI要素への参照
         const titleScreen = document.getElementById('title-screen');
@@ -318,6 +320,27 @@
         const messageBox = document.getElementById('message-box');
         const messageText = document.getElementById('message-text');
         const messageCloseBtn = document.getElementById('message-close-btn');
+
+        // 効果音を初期化
+        function initializeSound() {
+            // Tone.jsを初期化
+            synth = new Tone.Synth().toDestination();
+        }
+
+        // 正解音を再生する
+        async function playCorrectSound() {
+            // ブラウザの自動再生ポリシーに対応するため、ユーザーインタラクション後にTone.jsを起動
+            await Tone.start();
+            // ピンポンに似た音を出すための周波数と持続時間を設定
+            synth.triggerAttackRelease("C5", "8n", "+0.01");
+            synth.triggerAttackRelease("G5", "8n", "+0.15");
+        }
+        
+        // 不正解音を再生する
+        async function playIncorrectSound() {
+            await Tone.start();
+            synth.triggerAttackRelease("F#3", "8n");
+        }
 
         // ドラッグアンドドロップ関連のイベントハンドラ
         let draggedMarble = null;
@@ -410,6 +433,7 @@
         
         // レベル選択とゲーム開始
         function startGame(level) {
+            initializeSound(); // 効果音を初期化
             currentLevel = level;
             titleScreen.style.display = 'none';
             gameScreen.style.display = 'flex';
@@ -525,6 +549,7 @@
 
             if (foundCombinations.has(currentCombination)) {
                 showModal('ヒント', 'この組み合わせはもう見つけているよ。');
+                playIncorrectSound(); // 不正解音を再生
                 resetSplitBoxes();
                 return;
             }
@@ -532,6 +557,7 @@
             if (allCombinations.includes(currentCombination)) {
                 foundCombinations.add(currentCombination);
                 updateLamps();
+                playCorrectSound(); // 正解音を再生
                 
                 // 全問正解したかチェック
                 if (foundCombinations.size === allCombinations.length) {
@@ -548,6 +574,7 @@
             } else {
                 // 不正解
                 showModal('残念！', 'この組み合わせは違うみたい。');
+                playIncorrectSound(); // 不正解音を再生
                 resetSplitBoxes();
             }
         }
@@ -615,4 +642,3 @@
     </script>
 </body>
 </html>
-
