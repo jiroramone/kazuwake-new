@@ -394,15 +394,22 @@
         document.addEventListener('touchstart', (e) => {
             const marble = e.target.closest('.marble');
             if (marble) {
-                draggedMarble = marble;
-                marble.classList.add('opacity-50');
-                marble.style.position = 'absolute';
+                // タッチ開始時に元のマーブルを非表示にする
+                draggedMarble = marble.cloneNode(true);
+                draggedMarble.style.position = 'absolute';
+                draggedMarble.classList.add('opacity-50'); // ドラッグ中の見た目を変更
+                document.body.appendChild(draggedMarble);
+                marble.style.visibility = 'hidden'; // 元のマーブルを非表示に
+                
+                const touch = e.touches[0];
+                draggedMarble.style.left = `${touch.clientX - marble.offsetWidth / 2}px`;
+                draggedMarble.style.top = `${touch.clientY - marble.offsetHeight / 2}px`;
             }
         });
 
         document.addEventListener('touchmove', (e) => {
             if (!draggedMarble) return;
-            e.preventDefault();
+            e.preventDefault(); // これを追加してデフォルトのタッチ動作を無効化
             const touch = e.touches[0];
             draggedMarble.style.left = `${touch.clientX - draggedMarble.offsetWidth / 2}px`;
             draggedMarble.style.top = `${touch.clientY - draggedMarble.offsetHeight / 2}px`;
@@ -416,14 +423,22 @@
             const parentSplitBox = targetElement.closest('.plate-box');
             const marblesAreaElement = targetElement.closest('#marbles-area');
 
+            // 元のマーブルを再表示する
+            const originalMarble = document.querySelector(`.marble[style*="visibility: hidden"]`);
+            if (originalMarble) {
+                originalMarble.style.visibility = 'visible';
+            }
+            
             if (parentSplitBox) {
-                parentSplitBox.appendChild(draggedMarble);
+                // 新しいマーブルをドロップ先に移動
+                parentSplitBox.appendChild(originalMarble);
             } else if (marblesAreaElement) {
-                marblesArea.appendChild(draggedMarble);
+                // 新しいマーブルを元のエリアに移動
+                marblesArea.appendChild(originalMarble);
             }
 
-            draggedMarble.style = '';
-            draggedMarble.classList.remove('opacity-50');
+            // ドラッグ用のマーブルを削除
+            draggedMarble.remove();
             draggedMarble = null;
         });
 
@@ -689,4 +704,3 @@
 </body>
 </html>
 
-</html>
