@@ -151,8 +151,8 @@
         }
 
         .marble {
-            width: 40px; /* ビー玉のサイズを大きく */
-            height: 40px; /* ビー玉のサイズを大きく */
+            width: 30px; /* ビー玉のサイズをさらに小さく */
+            height: 30px; /* ビー玉のサイズをさらに小さく */
             background-color: #e53e3e;
             border-radius: 50%;
             cursor: grab;
@@ -233,9 +233,9 @@
         }
 
         #submit-btn {
-            padding: 1rem 2rem;
-            font-size: 1.25rem;
-            margin-top: 10px; /* ボタンの位置をさらに上に調整 */
+            padding: 0.75rem 1.5rem; /* 余白とフォントサイズを小さくする */
+            font-size: 1rem;
+            margin-top: 5px; /* ボタンの位置をさらに上に調整 */
         }
 
         #message-box {
@@ -274,8 +274,8 @@
                     <div id="lamps-container"></div>
                     <p id="problem-question">いくつといくつにわけられる？</p>
                     <p id="problem-text" class="my-4">3</p>
-                    <div id="marbles-area" ondrop="handleDrop(event)" ondragover="allowDrop(event)" ondragleave="handleDragLeave(event)"></div>
                     <button id="submit-btn" class="btn" onclick="handleSubmit()">できた！</button>
+                    <div id="marbles-area" ondrop="handleDrop(event)" ondragover="allowDrop(event)" ondragleave="handleDragLeave(event)"></div>
                 </div>
     
                 <div id="timer" class="hidden"></div>
