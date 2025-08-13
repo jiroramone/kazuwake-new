@@ -417,8 +417,13 @@
         document.addEventListener('touchend', (e) => {
             if (!draggedMarble) return;
 
+            // ドロップ先の要素を正しく取得するために、一時的にクローンを非表示にする
+            draggedMarble.style.display = 'none';
             const touch = e.changedTouches[0];
             const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
+            // 非表示にしたクローンを元に戻す
+            draggedMarble.style.display = 'block';
+
             const parentSplitBox = targetElement.closest('.plate-box');
             const marblesAreaElement = targetElement.closest('#marbles-area');
 
@@ -433,6 +438,9 @@
             } else if (marblesAreaElement) {
                 // 元のエリアに元のマーブルを移動
                 marblesArea.appendChild(originalMarble);
+            } else {
+                 // どこにもドロップされなかった場合、元のエリアに戻す
+                 marblesArea.appendChild(originalMarble);
             }
 
             // ドラッグ用のマーブルを削除
@@ -702,4 +710,3 @@
     </script>
 </body>
 </html>
-
