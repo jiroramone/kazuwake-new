@@ -82,7 +82,7 @@
             padding: 1rem; /* 余白を縮小 */
             text-align: center;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            width: 80%; /* 黒板の大きさを縮小 */
+            width: 70%; /* 黒板の大きさを縮小 */
             position: relative;
             display: flex; /* Flexboxで子要素を配置 */
             flex-direction: column;
@@ -91,20 +91,20 @@
         }
         
         #problem-question {
-            font-size: 2rem;
+            font-size: 1.5rem;
             font-weight: bold;
             color: #e2e8f0;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-            margin-bottom: 1rem;
+            margin-bottom: 0;
         }
 
         #problem-text {
-            font-size: 5rem;
+            font-size: 3rem;
             font-weight: bold;
             color: #fed7aa; /* Chalk-like color */
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
             transition: opacity 0.75s ease-in-out; /* フェードアニメーションを追加 */
-            margin-bottom: 0.5rem; /* 間隔を狭める */
+            margin: 0;
         }
         
         #problem-text.fade-out {
@@ -148,6 +148,7 @@
             min-height: 50px;
             width: 100%;
             margin-bottom: 20px;
+            margin-top: 0.5rem; /* マージンを調整 */
         }
 
         .marble {
@@ -231,11 +232,18 @@
             flex-direction: column;
             gap: 15px;
         }
+        
+        #problem-text-and-button-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px; /* 余白を調整 */
+        }
 
         #submit-btn {
-            padding: 0.75rem 1.5rem; /* 余白とフォントサイズを小さくする */
+            padding: 0.5rem 1rem; /* ボタンのサイズを小さくする */
             font-size: 1rem;
-            margin-top: 5px; /* ボタンの位置をさらに上に調整 */
+            margin: 0;
         }
 
         #message-box {
@@ -273,8 +281,11 @@
                 <div id="problem-container">
                     <div id="lamps-container"></div>
                     <p id="problem-question">いくつといくつにわけられる？</p>
-                    <p id="problem-text" class="my-4">3</p>
-                    <button id="submit-btn" class="btn" onclick="handleSubmit()">できた！</button>
+                    <!-- 数字とボタンを囲む新しいコンテナ -->
+                    <div id="problem-text-and-button-container">
+                        <p id="problem-text">3</p>
+                        <button id="submit-btn" class="btn" onclick="handleSubmit()">できた！</button>
+                    </div>
                     <div id="marbles-area" ondrop="handleDrop(event)" ondragover="allowDrop(event)" ondragleave="handleDragLeave(event)"></div>
                 </div>
     
